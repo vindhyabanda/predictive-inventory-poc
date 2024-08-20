@@ -4,8 +4,10 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.metrics import mean_absolute_error, mean_squared_error
 import numpy as np
 
-# Load the data
-file_path = "sample_inventory_data.xlsx"  # Update with the correct path if necessary
+# Uses Random Forest Model
+
+# Loading the data
+file_path = "sample_inventory_data.xlsx"
 df = pd.read_excel(file_path)
 
 # Data Preprocessing
@@ -13,10 +15,10 @@ df['Date'] = pd.to_datetime(df['Date'])
 df['DayOfWeek'] = df['Date'].dt.dayofweek
 df['Month'] = df['Date'].dt.month
 
-# Convert categorical data to numerical (One-Hot Encoding)
+# Convert categorical data to numerical (this is One-Hot Encoding)
 df = pd.get_dummies(df, columns=['Category', 'Promotion', 'Supplier'])
 
-# Feature Engineering
+# Feature we're considering, target to be populated: Quantity Sold
 features = df.drop(columns=['Date', 'Product ID', 'Product Name', 'Quantity Sold'])
 target = df['Quantity Sold']
 
@@ -35,7 +37,6 @@ rmse = np.sqrt(mean_squared_error(y_test, y_pred))
 print(f'Mean Absolute Error: {mae}')
 print(f'Root Mean Squared Error: {rmse}')
 
-# Future Predictions (Example)
 # Create a sample row to predict future quantity sold
 future_df = pd.DataFrame({
     'Stock Level': [150],
@@ -49,13 +50,16 @@ future_df = pd.DataFrame({
     'Category_Groceries': [0],
     'Promotion_No': [1],
     'Promotion_Yes': [0],
-    'Supplier_Supplier 1': [1],  # Adjust based on the supplier encoding in your data
+    'Supplier_Supplier 1': [1],
     'Supplier_Supplier 2': [0],
     'Supplier_Supplier 3': [0],
     'Supplier_Supplier 4': [0],
     'Supplier_Supplier 5': [0],
-    # Add other one-hot encoded columns as per your data
 })
 
+# Ensures that future_df has the same columns as the training features
+future_df = future_df.reindex(columns=X_train.columns, fill_value=0)
+
+# Predicts future quantity sold
 prediction = model.predict(future_df)
 print(f'Predicted Quantity Sold: {prediction[0]}')
